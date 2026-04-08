@@ -101,7 +101,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=${{ needs.semrel.outputs.version }}
-          gh release upload "v${VERSION}" google-mcp_*.tar.gz google-mcp_*.zip --clobber 2>/dev/null || true
+          ARCHIVE=$(ls google-mcp_${VERSION}_*.tar.gz google-mcp_${VERSION}_*.zip 2>/dev/null)
+          gh release upload "v${VERSION}" $ARCHIVE --clobber
 
   publish:
     needs: [semrel, build]
