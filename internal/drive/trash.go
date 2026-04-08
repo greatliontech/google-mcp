@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/thegrumpylion/google-mcp/internal/auth"
-	"github.com/thegrumpylion/google-mcp/internal/server"
+	"github.com/greatliontech/google-mcp/internal/auth"
+	"github.com/greatliontech/google-mcp/internal/server"
 )
 
 // --- empty_trash ---

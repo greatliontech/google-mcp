@@ -4,8 +4,8 @@ package drive
 import (
 	"context"
 
-	"github.com/thegrumpylion/google-mcp/internal/auth"
-	"github.com/thegrumpylion/google-mcp/internal/server"
+	"github.com/greatliontech/google-mcp/internal/auth"
+	"github.com/greatliontech/google-mcp/internal/server"
 	"google.golang.org/api/drive/v3"
 )
 

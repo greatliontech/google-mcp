@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/thegrumpylion/google-mcp/internal/auth"
-	"github.com/thegrumpylion/google-mcp/internal/bridge"
-	"github.com/thegrumpylion/google-mcp/internal/localfs"
-	"github.com/thegrumpylion/google-mcp/internal/server"
+	"github.com/greatliontech/google-mcp/internal/auth"
+	"github.com/greatliontech/google-mcp/internal/bridge"
+	"github.com/greatliontech/google-mcp/internal/localfs"
+	"github.com/greatliontech/google-mcp/internal/server"
 )
 
 // resolveDriveAttachments fetches Drive files server-side and appends them

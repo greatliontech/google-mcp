@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/thegrumpylion/google-mcp/internal/localfs"
+	"github.com/greatliontech/google-mcp/internal/localfs"
 )
 
 // dummyHandler is a no-op tool handler for testing.

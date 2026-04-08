@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/thegrumpylion/google-mcp/internal/localfs"
+	"github.com/greatliontech/google-mcp/internal/localfs"
 )
 
 // RegisterLocalFSTools registers the list_local_files and read_local_file

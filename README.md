@@ -17,18 +17,28 @@ Supports multiple Google accounts (e.g. "personal", "work") with a single binary
 
 ## Install
 
+### Homebrew (macOS / Linux)
+
+```sh
+brew install greatliontech/tap/google-mcp
+```
+
+### GitHub Releases
+
+Download pre-built binaries from the [releases page](https://github.com/greatliontech/google-mcp/releases) for Linux, macOS, and Windows (amd64/arm64).
+
 ### From source
 
 Requires [Go 1.25+](https://go.dev/dl/).
 
 ```sh
-go install github.com/thegrumpylion/google-mcp@latest
+go install github.com/greatliontech/google-mcp@latest
 ```
 
 Or clone and build:
 
 ```sh
-git clone https://github.com/thegrumpylion/google-mcp.git
+git clone https://github.com/greatliontech/google-mcp.git
 cd google-mcp
 go build -o ~/.local/bin/google-mcp .
 ```
@@ -94,10 +104,13 @@ Enable the APIs for the services you want to use:
 6. Click **Download JSON** (or the download icon next to your new client ID)
 7. Save the file as `credentials.json` in your config directory:
 
-```sh
-mkdir -p ~/.config/google-mcp
-mv ~/Downloads/client_secret_*.json ~/.config/google-mcp/credentials.json
-```
+| Platform | Default config directory |
+|----------|------------------------|
+| Linux    | `~/.config/google-mcp` |
+| macOS    | `~/Library/Application Support/google-mcp` |
+| Windows  | `%AppData%\google-mcp` |
+
+Override with `--config-dir`.
 
 ## Account Setup
 
@@ -503,10 +516,10 @@ list_events(account="all")                                     # on calendar ser
 
 | File | Purpose |
 |------|---------|
-| `~/.config/google-mcp/credentials.json` | OAuth client credentials from Google Cloud Console |
-| `~/.config/google-mcp/tokens.json` | Stored account tokens (created by `auth add`) |
+| `<config-dir>/credentials.json` | OAuth client credentials from Google Cloud Console |
+| `<config-dir>/tokens.json` | Stored account tokens (created by `auth add`) |
 
-The config directory defaults to `$XDG_CONFIG_HOME/google-mcp` or `~/.config/google-mcp`. Override with `--config-dir`.
+The config directory uses the platform-native location (Linux: `~/.config/google-mcp`, macOS: `~/Library/Application Support/google-mcp`, Windows: `%AppData%\google-mcp`). Override with `--config-dir`.
 
 ## License
 

@@ -42,19 +42,19 @@ type Manager struct {
 
 // NewManager creates a new auth manager.
 //
-// configDir defaults to $XDG_CONFIG_HOME/google-mcp (or ~/.config/google-mcp).
+// configDir defaults to the platform-native config directory:
+//   - Linux: $XDG_CONFIG_HOME/google-mcp (or ~/.config/google-mcp)
+//   - macOS: ~/Library/Application Support/google-mcp
+//   - Windows: %AppData%/google-mcp
+//
 // credentialsFile defaults to <configDir>/credentials.json.
 func NewManager(configDir, credentialsFile string) (*Manager, error) {
 	if configDir == "" {
-		xdg := os.Getenv("XDG_CONFIG_HOME")
-		if xdg == "" {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				return nil, fmt.Errorf("could not determine home directory: %w", err)
-			}
-			xdg = filepath.Join(home, ".config")
+		base, err := os.UserConfigDir()
+		if err != nil {
+			return nil, fmt.Errorf("could not determine config directory: %w", err)
 		}
-		configDir = filepath.Join(xdg, "google-mcp")
+		configDir = filepath.Join(base, "google-mcp")
 	}
 
 	if credentialsFile == "" {

@@ -8,12 +8,12 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/spf13/cobra"
-	"github.com/thegrumpylion/google-mcp/internal/auth"
-	"github.com/thegrumpylion/google-mcp/internal/calendar"
-	"github.com/thegrumpylion/google-mcp/internal/drive"
-	"github.com/thegrumpylion/google-mcp/internal/gmail"
-	"github.com/thegrumpylion/google-mcp/internal/localfs"
-	"github.com/thegrumpylion/google-mcp/internal/server"
+	"github.com/greatliontech/google-mcp/internal/auth"
+	"github.com/greatliontech/google-mcp/internal/calendar"
+	"github.com/greatliontech/google-mcp/internal/drive"
+	"github.com/greatliontech/google-mcp/internal/gmail"
+	"github.com/greatliontech/google-mcp/internal/localfs"
+	"github.com/greatliontech/google-mcp/internal/server"
 )
 
 var (
@@ -49,7 +49,7 @@ Setup:
   3. Add accounts: google-mcp auth add <name>`,
 	}
 
-	root.PersistentFlags().StringVar(&configDir, "config-dir", "", "config directory (default: $XDG_CONFIG_HOME/google-mcp)")
+	root.PersistentFlags().StringVar(&configDir, "config-dir", "", "config directory (default: platform config dir/google-mcp)")
 	root.PersistentFlags().StringVar(&credentialsFile, "credentials", "", "path to Google OAuth credentials.json (default: <config-dir>/credentials.json)")
 
 	root.AddCommand(
@@ -57,6 +57,7 @@ Setup:
 		newGmailCmd(),
 		newDriveCmd(),
 		newCalendarCmd(),
+		newVersionCmd(),
 	)
 
 	return root
@@ -358,6 +359,18 @@ Use --allow-read-dir to enable local file access (opt-in, secure).`,
 	addToolFilterFlags(cmd, &flags)
 	addLocalFSFlags(cmd, &fsFlags)
 	return cmd
+}
+
+// --- version command ---
+
+func newVersionCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: "Print the version",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(version)
+		},
+	}
 }
 
 // --- helpers ---

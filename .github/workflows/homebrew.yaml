@@ -1,0 +1,66 @@
+name: Homebrew
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  homebrew:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.GLT_RELEASER_APP_ID }}
+          private-key: ${{ secrets.GLT_RELEASER_APP_KEY }}
+          repositories: homebrew-tap
+
+      - name: Get version
+        id: version
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          echo "VERSION=${TAG#v}" >> $GITHUB_OUTPUT
+
+      - name: Download release artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          gh release download ${{ github.event.release.tag_name }} \
+            --pattern "google-mcp_${VERSION}_darwin_*.tar.gz" \
+            --pattern "google-mcp_${VERSION}_linux_*.tar.gz"
+
+      - name: Calculate checksums
+        id: checksums
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          echo "DARWIN_ARM64=$(sha256sum google-mcp_${VERSION}_darwin_arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "DARWIN_AMD64=$(sha256sum google-mcp_${VERSION}_darwin_amd64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "LINUX_ARM64=$(sha256sum google-mcp_${VERSION}_linux_arm64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+          echo "LINUX_AMD64=$(sha256sum google-mcp_${VERSION}_linux_amd64.tar.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+      - name: Update Homebrew tap
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+
+          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/greatliontech/homebrew-tap.git tap
+          cd tap
+
+          mkdir -p Formula
+          cp ../packaging/brew/google-mcp.rb Formula/google-mcp.rb
+
+          sed -i "s/version \"VERSION\"/version \"${VERSION}\"/" Formula/google-mcp.rb
+          sed -i "s/CHECKSUM_DARWIN_ARM64/${{ steps.checksums.outputs.DARWIN_ARM64 }}/" Formula/google-mcp.rb
+          sed -i "s/CHECKSUM_DARWIN_AMD64/${{ steps.checksums.outputs.DARWIN_AMD64 }}/" Formula/google-mcp.rb
+          sed -i "s/CHECKSUM_LINUX_ARM64/${{ steps.checksums.outputs.LINUX_ARM64 }}/" Formula/google-mcp.rb
+          sed -i "s/CHECKSUM_LINUX_AMD64/${{ steps.checksums.outputs.LINUX_AMD64 }}/" Formula/google-mcp.rb
+
+          git config user.name "greatbot"
+          git config user.email "bot@greatlion.tech"
+          git add .
+          git commit -m "Update google-mcp to v${VERSION}" || exit 0
+          git push

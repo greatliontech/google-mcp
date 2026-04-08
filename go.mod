@@ -1,4 +1,4 @@
-module github.com/thegrumpylion/google-mcp
+module github.com/greatliontech/google-mcp
 
 go 1.25.0
 

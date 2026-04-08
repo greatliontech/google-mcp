@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/thegrumpylion/google-mcp/internal/auth"
+	"github.com/greatliontech/google-mcp/internal/auth"
 	driveapi "google.golang.org/api/drive/v3"
 	gmailapi "google.golang.org/api/gmail/v1"
 )

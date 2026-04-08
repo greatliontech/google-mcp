@@ -9,9 +9,9 @@ import (
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/thegrumpylion/google-mcp/internal/auth"
-	"github.com/thegrumpylion/google-mcp/internal/localfs"
-	"github.com/thegrumpylion/google-mcp/internal/server"
+	"github.com/greatliontech/google-mcp/internal/auth"
+	"github.com/greatliontech/google-mcp/internal/localfs"
+	"github.com/greatliontech/google-mcp/internal/server"
 	driveapi "google.golang.org/api/drive/v3"
 )
 
