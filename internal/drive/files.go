@@ -61,6 +61,9 @@ func registerSearch(srv *server.Server, mgr *auth.Manager) {
 				Q(input.Query).
 				PageSize(maxResults).
 				Fields("files(id,name,mimeType,size,modifiedTime,owners,webViewLink)").
+				SupportsAllDrives(true).
+				IncludeItemsFromAllDrives(true).
+				Corpora("allDrives").
 				Do()
 			if err != nil {
 				if multiAccount {
@@ -146,10 +149,13 @@ func registerList(srv *server.Server, mgr *auth.Manager) {
 			call := svc.Files.List().
 				PageSize(maxResults).
 				OrderBy(orderBy).
-				Fields("files(id,name,mimeType,size,modifiedTime,owners,webViewLink)")
+				Fields("files(id,name,mimeType,size,modifiedTime,owners,webViewLink)").
+				SupportsAllDrives(true).
+				IncludeItemsFromAllDrives(true)
 
 			if input.FolderID != "" {
-				call = call.Q(fmt.Sprintf("'%s' in parents and trashed = false", input.FolderID))
+				call = call.Q(fmt.Sprintf("'%s' in parents and trashed = false", input.FolderID)).
+					Corpora("allDrives")
 			} else {
 				call = call.Q("trashed = false")
 			}
@@ -209,7 +215,8 @@ func registerGet(srv *server.Server, mgr *auth.Manager) {
 		}
 
 		file, err := svc.Files.Get(input.FileID).
-			Fields("id,name,mimeType,size,description,modifiedTime,createdTime,owners,parents,webViewLink,webContentLink,exportLinks").
+			Fields("id,name,mimeType,size,description,modifiedTime,createdTime,owners,parents,webViewLink,webContentLink,exportLinks,driveId").
+			SupportsAllDrives(true).
 			Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("getting file: %w", err)
@@ -281,7 +288,7 @@ For Google Docs/Sheets/Slides, specify export_mime_type to choose the export for
 		}
 
 		// First, get file metadata to determine if it's a Google Workspace file.
-		file, err := svc.Files.Get(input.FileID).Fields("id,name,mimeType,size").Do()
+		file, err := svc.Files.Get(input.FileID).Fields("id,name,mimeType,size").SupportsAllDrives(true).Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("getting file metadata: %w", err)
 		}
@@ -300,7 +307,7 @@ For Google Docs/Sheets/Slides, specify export_mime_type to choose the export for
 			}
 			body = resp.Body
 		} else {
-			resp, err := svc.Files.Get(input.FileID).Download()
+			resp, err := svc.Files.Get(input.FileID).SupportsAllDrives(true).Download()
 			if err != nil {
 				return nil, nil, fmt.Errorf("downloading file: %w", err)
 			}
@@ -436,7 +443,8 @@ For local files, the name is auto-detected from the filename if not specified.` 
 		}
 
 		created, err := svc.Files.Create(file).Media(reader).
-			Fields("id,name,mimeType,size,webViewLink").Do()
+			Fields("id,name,mimeType,size,webViewLink").
+			SupportsAllDrives(true).Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("uploading file: %w", err)
 		}
@@ -496,7 +504,8 @@ func registerUpdate(srv *server.Server, mgr *auth.Manager) {
 		}
 
 		updated, err := svc.Files.Update(input.FileID, file).
-			Fields("id,name,mimeType,size,description,modifiedTime,webViewLink").Do()
+			Fields("id,name,mimeType,size,description,modifiedTime,webViewLink").
+			SupportsAllDrives(true).Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("updating file: %w", err)
 		}
@@ -543,7 +552,7 @@ Set permanently=true to permanently delete the file (cannot be undone).`,
 		}
 
 		if input.Permanently {
-			if err := svc.Files.Delete(input.FileID).Do(); err != nil {
+			if err := svc.Files.Delete(input.FileID).SupportsAllDrives(true).Do(); err != nil {
 				return nil, nil, fmt.Errorf("deleting file: %w", err)
 			}
 			return &mcp.CallToolResult{
@@ -557,7 +566,7 @@ Set permanently=true to permanently delete the file (cannot be undone).`,
 		_, err = svc.Files.Update(input.FileID, &drive.File{
 			Trashed:         true,
 			ForceSendFields: []string{"Trashed"},
-		}).Do()
+		}).SupportsAllDrives(true).Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("trashing file: %w", err)
 		}
@@ -599,7 +608,7 @@ func registerCreateFolder(srv *server.Server, mgr *auth.Manager) {
 			folder.Parents = []string{input.FolderID}
 		}
 
-		created, err := svc.Files.Create(folder).Fields("id,name,webViewLink").Do()
+		created, err := svc.Files.Create(folder).Fields("id,name,webViewLink").SupportsAllDrives(true).Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("creating folder: %w", err)
 		}
@@ -642,7 +651,7 @@ func registerMove(srv *server.Server, mgr *auth.Manager) {
 		}
 
 		// Get current parents to remove them.
-		file, err := svc.Files.Get(input.FileID).Fields("parents").Do()
+		file, err := svc.Files.Get(input.FileID).Fields("parents").SupportsAllDrives(true).Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("getting file parents: %w", err)
 		}
@@ -652,7 +661,8 @@ func registerMove(srv *server.Server, mgr *auth.Manager) {
 		updated, err := svc.Files.Update(input.FileID, &drive.File{}).
 			AddParents(input.FolderID).
 			RemoveParents(previousParents).
-			Fields("id,name,parents,webViewLink").Do()
+			Fields("id,name,parents,webViewLink").
+			SupportsAllDrives(true).Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("moving file: %w", err)
 		}
@@ -697,7 +707,8 @@ func registerCopy(srv *server.Server, mgr *auth.Manager) {
 		}
 
 		copied, err := svc.Files.Copy(input.FileID, copyFile).
-			Fields("id,name,mimeType,size,webViewLink").Do()
+			Fields("id,name,mimeType,size,webViewLink").
+			SupportsAllDrives(true).Do()
 		if err != nil {
 			return nil, nil, fmt.Errorf("copying file: %w", err)
 		}
